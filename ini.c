@@ -16,7 +16,6 @@ https://github.com/benhoyt/inih
 #endif
 
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
 
 #include "ini.h"
@@ -34,11 +33,16 @@ typedef struct {
     size_t num_left;
 } ini_parse_string_ctx;
 
+static int s_isspace(char c)
+{
+   return c == ' ' || (c >= (char)0x9 && c <= (char)0xD);
+}
+
 /* Strip whitespace chars off end of given string, in place. Return length. */
 static unsigned rstrip(char* s)
 {
     char* p = s + strlen(s);
-    while (p != s && isspace(*--p))
+    while (p != s && s_isspace(*--p))
         ;
     p[1] = '\0';
     return (unsigned)(p + 1 - s);
@@ -47,7 +51,7 @@ static unsigned rstrip(char* s)
 /* Return pointer to first non-whitespace char in given string. */
 static char* lskip(const char* s)
 {
-    while (*s && isspace((unsigned char)(*s)))
+    while (*s && s_isspace((unsigned char)(*s)))
         s++;
     return (char*)s;
 }
@@ -61,7 +65,7 @@ static char* find_chars_or_comment(const char* s, const char* chars)
     int was_space = 0;
     while (*s && (!chars || !strchr(chars, *s)) &&
            !(was_space && strchr(INI_INLINE_COMMENT_PREFIXES, *s))) {
-        was_space = isspace((unsigned char)(*s));
+        was_space = s_isspace((unsigned char)(*s));
         s++;
     }
 #else
